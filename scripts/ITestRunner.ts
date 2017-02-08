@@ -1,11 +1,12 @@
-import {Event, IProjection} from "prettygoat";
+import {Event, IProjectionDefinitionn} from "prettygoat";
 
 interface ITestRunner<T> {
-    of(projection: IProjection<T>): ITestRunner<T>;
-    events(events: Event[]): ITestRunner<T>;
-    rawEvents(events: any[]): ITestRunner<T>;
+    of(projection: IProjectionDefinition<T>): ITestRunner<T>;
+    fromEvents(events: Event[]): ITestRunner<T>;
+    fromRawEvents(events: any[]): ITestRunner<T>;
     startWith(initialState: T): ITestRunner<T>;
-    run(): T;
+    stopAt(date:Date):ITestRunner<T>;
+    run(): Promise<T>;
 }
 
 export default ITestRunner

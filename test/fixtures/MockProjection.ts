@@ -10,11 +10,11 @@ export default class MockProjection implements IProjectionDefinition<number> {
                 $init: () => {
                     return 10;
                 },
-                test: (s, e) => {
+                test: (s, e: number) => {
                     s = s + e;
                     return s;
                 },
-                "testRaw": (s, e) => {
+                "testRaw": (s, e: any) => {
                     s = s + e.count;
                     return s;
                 }
