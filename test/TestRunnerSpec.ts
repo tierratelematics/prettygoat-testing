@@ -4,7 +4,6 @@ import * as TypeMoq from "typemoq";
 import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
-import MockDate from "./fixtures/MockDate";
 import MockObjectContainer from "./fixtures/MockObjectContainer";
 
 describe("Given a test runner", () => {
@@ -69,9 +68,29 @@ describe("Given a test runner", () => {
                         splitKey: null,
                         timestamp: new Date(200)
                     }])
-                    .stopAt(new Date(100));
+                    .stopAt(new Date(200));
                 let state = await subject.run();
                 expect(state).to.be(70);
+            });
+        });
+
+        context("when the projection is running past the stop date", () => {
+            it("should stop the projection", async() => {
+                subject
+                    .fromEvents([{
+                        type: "test",
+                        payload: 20,
+                        splitKey: null,
+                        timestamp: new Date(100)
+                    }, {
+                        type: "test",
+                        payload: 40,
+                        splitKey: null,
+                        timestamp: new Date(200)
+                    }])
+                    .stopAt(new Date(150));
+                let state = await subject.run();
+                expect(state).to.be(30);
             });
         });
 
@@ -89,7 +108,7 @@ describe("Given a test runner", () => {
                         splitKey: null,
                         timestamp: new Date(200)
                     }])
-                    .stopAt(new Date(100));
+                    .stopAt(new Date(200));
                 let state = await subject.run();
                 expect(state).to.be(70);
             });

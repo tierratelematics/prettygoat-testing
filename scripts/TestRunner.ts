@@ -12,7 +12,8 @@ class TestRunner<T> implements ITestRunner<T> {
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
                 @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
-                @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>) {
+                @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
+                @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory) {
 
     }
 
@@ -40,10 +41,20 @@ class TestRunner<T> implements ITestRunner<T> {
         return this;
     }
 
-    run(): T {
+    run(): Promise<T> {
         if (!this.projection)
             throw new Error("Missing projection to run");
-        return null;
+        if (!this.stopDate)
+            throw new Error("Missing required stop date");
+
+        return new Promise((resolve, reject) => {
+            let runner = this.runnerFactory.create(this.projection);
+            runner.subscribe(readModel => {
+                if (readModel.timestamp >= this.stopDate)
+                    resolve(readModel.payload);
+            }, error => reject(error));
+            runner.run(this.initialState ? new Snapshot(this.initialState, null) : null);
+        });
     }
 
     stopAt(date: Date): ITestRunner<T> {
