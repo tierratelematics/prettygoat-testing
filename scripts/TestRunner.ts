@@ -28,7 +28,7 @@ class TestRunner<T> implements ITestRunner<T> {
 
     }
 
-    of(constructor: IProjectionDefinition<T>): ITestRunner<T> {
+    of(constructor:interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T> {
         const key = `prettygoat:definitions:test`;
         this.container.set(key, constructor);
         let tickScheduler = <ITickScheduler>this.tickSchedulerFactory();
