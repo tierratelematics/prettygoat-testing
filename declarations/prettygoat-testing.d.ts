@@ -1,8 +1,8 @@
 import {interfaces} from "inversify";
-import {Observable} from "rx";
+import {Observable, IDisposable} from "rx";
 import {Dictionary, IWhen, Event, IStreamFactory, ICassandraDeserializer, ITickScheduler, IModule} from "prettygoat";
 
-export interface ITestRunner<T> {
+export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
     fromEvents(events: Event[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
@@ -48,6 +48,8 @@ export class TestRunner<T> implements ITestRunner<T> {
     run(): Promise<T>;
 
     stopAt(date: Date): ITestRunner<T>;
+
+    dispose():void;
 }
 
 export class TestEnvironment {

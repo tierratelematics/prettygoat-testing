@@ -11,6 +11,7 @@ import {
 } from "prettygoat";
 import {inject, interfaces, injectable} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
+import {Disposable} from "rx";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
@@ -20,6 +21,7 @@ class TestRunner<T> implements ITestRunner<T> {
     private stopDate: Date;
     private events: Event[] = [];
     private rawEvents: any[] = [];
+    private subscription: Disposable;
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
@@ -29,7 +31,7 @@ class TestRunner<T> implements ITestRunner<T> {
 
     }
 
-    of(constructor:interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T> {
+    of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T> {
         const key = `prettygoat:definitions:test`;
         this.container.set(key, constructor);
         let tickScheduler = <ITickScheduler>this.tickSchedulerFactory();
@@ -67,7 +69,7 @@ class TestRunner<T> implements ITestRunner<T> {
 
             let runner = this.runnerFactory.create(this.projection),
                 lastState: T = null;
-            runner.notifications().subscribe(readModel => {
+            this.subscription = runner.notifications().subscribe(readModel => {
                 if (+readModel.timestamp === +this.stopDate)
                     resolve(readModel.payload);
                 if (+readModel.timestamp > +this.stopDate)
@@ -81,6 +83,13 @@ class TestRunner<T> implements ITestRunner<T> {
     stopAt(date: Date): ITestRunner<T> {
         this.stopDate = date;
         return this;
+    }
+
+    dispose(): void {
+        if (this.subscription) {
+            this.subscription.dispose();
+            this.subscription = null;
+        }
     }
 
 }
