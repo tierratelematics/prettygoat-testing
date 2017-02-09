@@ -1,2 +1,2 @@
-export {default as ITestRunner} from "./ITestRunner";
+export {default as TestRunner} from "./TestRunner";
 export {default as TestEnvironment} from "./TestEnvironment";
