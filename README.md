@@ -1,5 +1,39 @@
 #Prettygoat-testing
 
+##How to use
+
+```typescript
+import {TestEnvironment, ITestRunner} from "prettygoat-testing";
+import {Projection} from "./Projection";
+
+describe("Given a projection", () => {
+
+    let environment: TestEnvironment;
+    let runner: ITestRunner<T>;
+
+    before(() => {
+        environment = new TestEnvironment();
+        environment.setup();
+    });
+
+    beforeEach(() => {
+        runner = environment.runner();
+    });
+
+    context("when something happens", () => {
+        it("should do this", async () => {
+            const events = require("./fixtures/events.json");
+            let state = await runner
+                .of(Projection)
+                .fromEvents(events)
+                .stopAt(new Date(400))
+                .run();
+            //assert something
+        });
+    });
+});
+```
+
 ## License
 
 Copyright 2016 Tierra SpA
