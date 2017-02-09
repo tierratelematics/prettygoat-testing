@@ -1,4 +1,4 @@
-import {IStreamFactory, Event, ICassandraDeserializer} from "prettygoat";
+import {IStreamFactory, Event, ICassandraDeserializer, IWhen} from "prettygoat";
 import {Observable} from "rx";
 import {inject} from "inversify";
 import {isString} from "lodash";
@@ -13,8 +13,6 @@ class TestStreamFactory implements IStreamFactory {
     }
 
     from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event> {
-        if (!this.events.length && !this.rawEvents.length)
-            throw new Error("Cannot run a projection without events");
         let parseRawEvents = !!this.rawEvents.length;
         return Observable
             .from(parseRawEvents ? this.rawEvents : this.events)

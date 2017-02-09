@@ -1,4 +1,5 @@
 import {interfaces} from "inversify";
+import {IObjectContainer} from "prettygoat";
 
 export default class MockObjectContainer implements IObjectContainer {
     private dictionary:{ [id:string]:interfaces.Newable<any>|any } = {};

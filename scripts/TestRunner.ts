@@ -1,5 +1,14 @@
 import ITestRunner from "./ITestRunner";
-import {IProjectionDefinition, Event, IObjectContainer, Dictionary} from "prettygoat";
+import {
+    IProjectionDefinition,
+    Event,
+    IObjectContainer,
+    Dictionary,
+    IProjectionRunnerFactory,
+    ITickScheduler,
+    IProjection,
+    Snapshot
+} from "prettygoat";
 import {inject, interfaces} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 
@@ -8,6 +17,8 @@ class TestRunner<T> implements ITestRunner<T> {
     private projection: IProjection<T>;
     private initialState: T;
     private stopDate: Date;
+    private events: Event[] = [];
+    private rawEvents: any[] = [];
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
@@ -20,19 +31,19 @@ class TestRunner<T> implements ITestRunner<T> {
     of(constructor: IProjectionDefinition<T>): ITestRunner<T> {
         const key = `prettygoat:definitions:test`;
         this.container.set(key, constructor);
-        let tickScheduler = this.tickSchedulerFactory();
+        let tickScheduler = <ITickScheduler>this.tickSchedulerFactory();
         this.projection = this.container.get<IProjectionDefinition<T>>(key).define(tickScheduler);
         this.tickSchedulerHolder[this.projection.name] = tickScheduler;
         return this;
     }
 
     fromEvents(events: Event[]): ITestRunner<T> {
-        this.streamFactory.setEvents(events);
+        this.events = events;
         return this;
     }
 
     fromRawEvents(events: any[]): ITestRunner<T> {
-        this.streamFactory.setRawEvents(events);
+        this.rawEvents = events;
         return this;
     }
 
@@ -43,15 +54,24 @@ class TestRunner<T> implements ITestRunner<T> {
 
     run(): Promise<T> {
         if (!this.projection)
-            throw new Error("Missing projection to run");
+            return Promise.reject(new Error("Missing projection to run"));
         if (!this.stopDate)
-            throw new Error("Missing required stop date");
+            return Promise.reject(new Error("Missing required stop date"));
+        if (!this.events.length && !this.rawEvents.length)
+            return Promise.reject(new Error("Cannot run a projection without events"));
 
         return new Promise((resolve, reject) => {
-            let runner = this.runnerFactory.create(this.projection);
-            runner.subscribe(readModel => {
-                if (readModel.timestamp >= this.stopDate)
+            this.streamFactory.setRawEvents(this.rawEvents);
+            this.streamFactory.setEvents(this.events);
+
+            let runner = this.runnerFactory.create(this.projection),
+                lastState: T = null;
+            runner.notifications().subscribe(readModel => {
+                if (+readModel.timestamp === +this.stopDate)
                     resolve(readModel.payload);
+                if (+readModel.timestamp > +this.stopDate)
+                    resolve(lastState);
+                lastState = readModel.payload;
             }, error => reject(error));
             runner.run(this.initialState ? new Snapshot(this.initialState, null) : null);
         });
