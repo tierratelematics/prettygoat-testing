@@ -1,6 +1,8 @@
 import {IDateRetriever} from "prettygoat";
+import {injectable} from "inversify";
 
 //Needed to force processing the events as historical
+@injectable()
 class TestDateRetriever implements IDateRetriever {
 
     getDate(): Date {

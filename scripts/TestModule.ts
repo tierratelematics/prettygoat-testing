@@ -12,7 +12,7 @@ class TestModule implements IModule {
         container.rebind("IDateRetriever").to(TestDateRetriever);
         container.rebind("IStreamFactory").to(TestStreamFactory);
         container.rebind("IReadModelFactory").to(TestReadModelFactory);
-        container.bind<ITestRunner>("ITestRunner").to(TestRunner);
+        container.bind<ITestRunner<any>>("ITestRunner").to(TestRunner);
     };
 
     register(registry: IProjectionRegistry, serviceLocator?: IServiceLocator, overrides?: any): void {

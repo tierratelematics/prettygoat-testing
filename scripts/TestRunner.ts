@@ -9,9 +9,10 @@ import {
     IProjection,
     Snapshot
 } from "prettygoat";
-import {inject, interfaces} from "inversify";
+import {inject, interfaces, injectable} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 
+@injectable()
 class TestRunner<T> implements ITestRunner<T> {
 
     private projection: IProjection<T>;

@@ -1,6 +1,8 @@
 import {IReadModelFactory, IWhen, Event} from "prettygoat";
 import {Observable} from "rx";
+import {injectable} from "inversify";
 
+@injectable()
 class TestReadModelFactory implements IReadModelFactory {
 
     asList(): any[] {

@@ -1,8 +1,9 @@
 import {IStreamFactory, Event, ICassandraDeserializer, IWhen} from "prettygoat";
 import {Observable} from "rx";
-import {inject} from "inversify";
+import {inject, injectable} from "inversify";
 import {isString} from "lodash";
 
+@injectable()
 class TestStreamFactory implements IStreamFactory {
 
     private events: Event[] = [];

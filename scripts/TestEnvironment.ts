@@ -9,13 +9,13 @@ class TestEnvironment {
     private container = new Container();
 
     setup(modules: IModule[] = []) {
-        modules.unshift(new PrettyGoatModule());
         modules.unshift(new TestModule());
-        forEach(modules => module.modules(this.container));
+        modules.unshift(new PrettyGoatModule());
+        forEach(modules, module => module.modules(this.container));
     }
 
-    runner(): ITestRunner {
-        return this.container.get<ITestRunner>("ITestRunner");
+    runner<T>(): ITestRunner<T> {
+        return this.container.get<ITestRunner<T>>("ITestRunner");
     }
 }
 

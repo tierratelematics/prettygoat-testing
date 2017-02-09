@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/node": "~6.0.52",
+    "@types/socket.io": "~1.4.27",
     "inversify": "~3.1.0",
     "lodash": "~4.13.1",
     "reflect-metadata": "0.1.8",
