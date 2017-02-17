@@ -1,6 +1,6 @@
 import {interfaces} from "inversify";
 import {Observable, IDisposable} from "rx";
-import {Dictionary, IWhen, Event, IStreamFactory, ICassandraDeserializer, ITickScheduler, IModule} from "prettygoat";
+import {Dictionary, IWhen, Event, IStreamFactory, IEventDeserializer, ITickScheduler, IModule} from "prettygoat";
 
 export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
@@ -13,7 +13,7 @@ export interface ITestRunner<T> extends IDisposable {
 
 declare class TestStreamFactory implements IStreamFactory {
 
-    constructor(cassandraDeserializer: ICassandraDeserializer);
+    constructor(deserializer: IEventDeserializer);
 
     from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event>;
 

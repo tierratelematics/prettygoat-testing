@@ -10,7 +10,7 @@ import MockProjectionRunnerFactory from "./fixtures/MockProjectionRunnerFactory"
 import TestStreamFactory from "../scripts/components/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rx";
-import MockCassandraDeserializer from "./fixtures/MockCassandraDeserializer";
+import MockEventDeserializer from "./fixtures/MockEventDeserializer";
 
 describe("Given a test runner", () => {
 
@@ -23,7 +23,7 @@ describe("Given a test runner", () => {
         projectionRunner = TypeMoq.Mock.ofType(MockProjectionRunner);
         runnerFactory = TypeMoq.Mock.ofType(MockProjectionRunnerFactory);
         objectContainer = TypeMoq.Mock.ofType(MockObjectContainer);
-        subject = new TestRunner<number>(new TestStreamFactory(new MockCassandraDeserializer()), objectContainer.object, () => null, {}, runnerFactory.object);
+        subject = new TestRunner<number>(new TestStreamFactory(new MockEventDeserializer()), objectContainer.object, () => null, {}, runnerFactory.object);
     });
 
     function publishReadModel(observer, type, payload, date) {
