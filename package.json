@@ -16,7 +16,7 @@
     "rx": "~4.1.0"
   },
   "peerDependencies": {
-    "prettygoat": "^1.0.0-rc1"
+    "prettygoat": "^1.0.0-rc3"
   },
   "main": "dist/prettygoat-testing.js",
   "typings": "declarations/prettygoat-testing.d.ts"
