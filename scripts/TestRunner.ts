@@ -17,7 +17,7 @@ import {Disposable} from "rx";
 class TestRunner<T> implements ITestRunner<T> {
 
     private projection: IProjection<T>;
-    private initialState: T;
+    private initialState: T|Dictionary<T>;
     private stopDate: Date;
     private events: Event[] = [];
     private rawEvents: any[] = [];
@@ -70,13 +70,13 @@ class TestRunner<T> implements ITestRunner<T> {
             this.streamFactory.setEvents(this.events);
 
             let runner = this.runnerFactory.create(this.projection),
-                lastState: T = null;
+                lastState: T|Dictionary<T> = null;
             this.subscription = runner.notifications().subscribe(readModel => {
                 if (+readModel.timestamp === +this.stopDate)
-                    resolve(readModel.payload);
+                    resolve(runner.state);
                 if (+readModel.timestamp > +this.stopDate)
                     resolve(lastState);
-                lastState = readModel.payload;
+                lastState = runner.state;
             }, error => reject(error));
             runner.run(this.initialState ? new Snapshot(this.initialState, null) : null);
         });

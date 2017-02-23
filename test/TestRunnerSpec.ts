@@ -26,7 +26,8 @@ describe("Given a test runner", () => {
         subject = new TestRunner<number>(new TestStreamFactory(new MockEventDeserializer()), objectContainer.object, () => null, {}, runnerFactory.object);
     });
 
-    function publishReadModel(observer, type, payload, date) {
+    function publishReadModel(runner, observer, type, payload, date) {
+        runner.state = payload;
         observer.onNext({
             type: type,
             payload: payload,
@@ -65,8 +66,8 @@ describe("Given a test runner", () => {
         context("and an initial state is given", () => {
             beforeEach(() => {
                 projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
-                    publishReadModel(observer, "Mock", 50, new Date(1));
-                    publishReadModel(observer, "Mock", 100, new Date(100));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
                 }));
             });
             it("should run the projection starting from that state", async() => {
@@ -95,9 +96,9 @@ describe("Given a test runner", () => {
         context("when a list of events is given", () => {
             beforeEach(() => {
                 projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
-                    publishReadModel(observer, "Mock", 10, new Date(1));
-                    publishReadModel(observer, "Mock", 30, new Date(100));
-                    publishReadModel(observer, "Mock", 70, new Date(200));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
             it("should process those events", async() => {
@@ -122,9 +123,9 @@ describe("Given a test runner", () => {
         context("when the projection is running past the stop date", () => {
             beforeEach(() => {
                 projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
-                    publishReadModel(observer, "Mock", 10, new Date(1));
-                    publishReadModel(observer, "Mock", 30, new Date(100));
-                    publishReadModel(observer, "Mock", 70, new Date(200));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
             it("should stop the projection", async() => {
@@ -149,9 +150,9 @@ describe("Given a test runner", () => {
         context("when a list of raw events is given", () => {
             beforeEach(() => {
                 projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
-                    publishReadModel(observer, "Mock", 10, new Date(1));
-                    publishReadModel(observer, "Mock", 30, new Date(100));
-                    publishReadModel(observer, "Mock", 70, new Date(200));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
             it("should parse and process those events", async() => {

@@ -1,5 +1,4 @@
-import {Subject, IObserver} from "rx";
-import {Event, IProjectionRunner, ProjectionStats, Snapshot, Dictionary} from "prettygoat";
+import {IProjectionRunner, ProjectionStats, Snapshot, Dictionary} from "prettygoat";
 
 class MockProjectionRunner<T> implements IProjectionRunner<T> {
     state:T;
@@ -18,12 +17,6 @@ class MockProjectionRunner<T> implements IProjectionRunner<T> {
     }
 
     stop():void {
-    }
-
-    pause():void {
-    }
-
-    resume():void {
     }
 
     dispose():void {
