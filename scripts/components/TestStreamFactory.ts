@@ -1,4 +1,4 @@
-import {IStreamFactory, Event, ICassandraDeserializer, IWhen} from "prettygoat";
+import {IStreamFactory, Event, IEventDeserializer, IWhen} from "prettygoat";
 import {Observable} from "rx";
 import {inject, injectable} from "inversify";
 import {isString} from "lodash";
@@ -9,7 +9,7 @@ class TestStreamFactory implements IStreamFactory {
     private events: Event[] = [];
     private rawEvents: any[] = [];
 
-    constructor(@inject("ICassandraDeserializer") private cassandraDeserializer: ICassandraDeserializer) {
+    constructor(@inject("IEventDeserializer") private deserializer: IEventDeserializer) {
 
     }
 
@@ -19,7 +19,7 @@ class TestStreamFactory implements IStreamFactory {
             .from(parseRawEvents ? this.rawEvents : this.events)
             .map(event => {
                 if (parseRawEvents)
-                    event = this.cassandraDeserializer.toEvent(event);
+                    event = this.deserializer.toEvent(event);
                 if (isString(event.timestamp))
                     event.timestamp = new Date(event.timestamp);
                 return event;
