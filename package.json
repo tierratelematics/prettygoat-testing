@@ -1,6 +1,6 @@
 {
   "name": "prettygoat-testing",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "devDependencies": {
     "@types/expect.js": "~0.3.29",
     "@types/mocha": "~2.2.33",
@@ -16,7 +16,7 @@
     "rx": "~4.1.0"
   },
   "peerDependencies": {
-    "prettygoat": "^1.0.0-rc3"
+    "prettygoat": "^1.0.0"
   },
   "main": "dist/prettygoat-testing.js",
   "typings": "declarations/prettygoat-testing.d.ts"
