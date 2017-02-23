@@ -35,6 +35,18 @@ describe("Given a test runner", () => {
         });
     }
 
+    context("when a projection is already registered", () => {
+        beforeEach(() => {
+            runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(TypeMoq.It.isAny())).returns(() => new MockProjection());
+            objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
+        });
+        it("should unbind it", () => {
+            subject.of(MockProjection);
+            objectContainer.verify(o => o.remove("prettygoat:definitions:test"), TypeMoq.Times.once());
+        });
+    });
+
     context("when a projection is supplied", () => {
         beforeEach(() => {
             runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
