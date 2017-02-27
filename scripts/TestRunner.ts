@@ -12,6 +12,8 @@ import {
 import {inject, interfaces, injectable} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
+import TestEvent from "./TestEvent";
+import {map} from "lodash";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
@@ -19,7 +21,7 @@ class TestRunner<T> implements ITestRunner<T> {
     private projection: IProjection<T>;
     private initialState: T|Dictionary<T>;
     private stopDate: Date;
-    private events: Event[] = [];
+    private events: TestEvent[] = [];
     private rawEvents: any[] = [];
     private subscription: Disposable;
 
@@ -42,7 +44,7 @@ class TestRunner<T> implements ITestRunner<T> {
         return this;
     }
 
-    fromEvents(events: Event[]): ITestRunner<T> {
+    fromEvents(events: TestEvent[]): ITestRunner<T> {
         this.events = events;
         return this;
     }
@@ -67,7 +69,14 @@ class TestRunner<T> implements ITestRunner<T> {
 
         return new Promise((resolve, reject) => {
             this.streamFactory.setRawEvents(this.rawEvents);
-            this.streamFactory.setEvents(this.events);
+            this.streamFactory.setEvents(map<TestEvent, Event>(this.events, event => {
+                return {
+                    type: event.type,
+                    payload: event.payload,
+                    timestamp: event.timestamp,
+                    splitKey: null
+                }
+            }));
 
             let runner = this.runnerFactory.create(this.projection),
                 lastState: T|Dictionary<T> = null;

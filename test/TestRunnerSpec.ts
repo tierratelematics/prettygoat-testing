@@ -31,8 +31,7 @@ describe("Given a test runner", () => {
         observer.onNext({
             type: type,
             payload: payload,
-            timestamp: date,
-            splitKey: null
+            timestamp: date
         });
     }
 
@@ -76,7 +75,6 @@ describe("Given a test runner", () => {
                     .fromEvents([{
                         type: "test",
                         payload: 50,
-                        splitKey: null,
                         timestamp: new Date(100)
                     }])
                     .stopAt(new Date(100));
@@ -106,12 +104,10 @@ describe("Given a test runner", () => {
                     .fromEvents([{
                         type: "test",
                         payload: 20,
-                        splitKey: null,
                         timestamp: new Date(100)
                     }, {
                         type: "test",
                         payload: 40,
-                        splitKey: null,
                         timestamp: new Date(200)
                     }])
                     .stopAt(new Date(200));
@@ -133,12 +129,10 @@ describe("Given a test runner", () => {
                     .fromEvents([{
                         type: "test",
                         payload: 20,
-                        splitKey: null,
                         timestamp: new Date(100)
                     }, {
                         type: "test",
                         payload: 40,
-                        splitKey: null,
                         timestamp: new Date(200)
                     }])
                     .stopAt(new Date(150));

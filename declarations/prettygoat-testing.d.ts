@@ -58,3 +58,11 @@ export class TestEnvironment {
 
     runner(): ITestRunner;
 }
+
+export class TestEvent {
+    type: string;
+    payload: any;
+    timestamp: Date;
+
+    constructor(type: string, payload: any, timestamp: Date);
+}
