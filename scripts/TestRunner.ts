@@ -14,7 +14,7 @@ import {inject, interfaces, injectable} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
 import TestEvent from "./TestEvent";
-import {map} from "lodash";
+import {map, last} from "lodash";
 import TestReadModelFactory from "./components/TestReadModelFactory";
 
 @injectable()
@@ -72,13 +72,12 @@ class TestRunner<T> implements ITestRunner<T> {
     run(): Promise<T> {
         if (!this.projection)
             return Promise.reject(new Error("Missing projection to run"));
-        if (!this.stopDate)
-            return Promise.reject(new Error("Missing required stop date"));
         if (!this.events.length && !this.rawEvents.length)
             return Promise.reject(new Error("Cannot run a projection without events"));
 
         return new Promise((resolve, reject) => {
             let events = this.events.length ? this.mapTestEvents(this.events) : this.deserializeEvents(this.rawEvents);
+            if (!this.stopDate) this.stopDate = last(events).timestamp;
             this.streamFactory.setEvents(events);
             this.readModelFactory.setReadModels(this.mapTestEvents(this.dependencies));
 
