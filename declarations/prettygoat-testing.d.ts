@@ -4,7 +4,8 @@ import {Dictionary, IWhen, Event, IStreamFactory, IEventDeserializer, ITickSched
 
 export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
-    fromEvents(events: Event[]): ITestRunner<T>;
+    fromEvents(TestEvent: TestEvent[]): ITestRunner<T>;
+    withDependencies(events: TestEvent[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
     startWith(initialState: T): ITestRunner<T>;
     stopAt(date: Date): ITestRunner<T>;
@@ -18,9 +19,6 @@ declare class TestStreamFactory implements IStreamFactory {
     from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event>;
 
     setEvents(events: Event[]);
-
-    setRawEvents(events: any[]);
-
 }
 
 export class TestRunner<T> implements ITestRunner<T> {
@@ -39,7 +37,9 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
 
-    fromEvents(events: Event[]): ITestRunner<T>;
+    fromEvents(events: TestEvent[]): ITestRunner<T>;
+
+    withDependencies(events: TestEvent[]): ITestRunner<T>;
 
     fromRawEvents(events: any[]): ITestRunner<T>;
 
@@ -49,7 +49,7 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     stopAt(date: Date): ITestRunner<T>;
 
-    dispose():void;
+    dispose(): void;
 }
 
 export class TestEnvironment {
@@ -57,4 +57,12 @@ export class TestEnvironment {
     setup(modules: IModule[] = []);
 
     runner(): ITestRunner;
+}
+
+export class TestEvent {
+    type: string;
+    payload: any;
+    timestamp: Date;
+
+    constructor(type: string, payload: any, timestamp: Date);
 }
