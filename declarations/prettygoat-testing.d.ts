@@ -4,7 +4,8 @@ import {Dictionary, IWhen, Event, IStreamFactory, IEventDeserializer, ITickSched
 
 export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
-    fromEvents(events: Event[]): ITestRunner<T>;
+    fromEvents(TestEvent: TestEvent[]): ITestRunner<T>;
+    withDependencies(events: TestEvent[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
     startWith(initialState: T): ITestRunner<T>;
     stopAt(date: Date): ITestRunner<T>;
@@ -39,7 +40,9 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
 
-    fromEvents(events: Event[]): ITestRunner<T>;
+    fromEvents(events: TestEvent[]): ITestRunner<T>;
+
+    withDependencies(events: TestEvent[]): ITestRunner<T>;
 
     fromRawEvents(events: any[]): ITestRunner<T>;
 
@@ -49,7 +52,7 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     stopAt(date: Date): ITestRunner<T>;
 
-    dispose():void;
+    dispose(): void;
 }
 
 export class TestEnvironment {

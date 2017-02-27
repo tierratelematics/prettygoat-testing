@@ -11,6 +11,8 @@ import TestStreamFactory from "../scripts/components/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rx";
 import MockEventDeserializer from "./fixtures/MockEventDeserializer";
+import MockSplitProjection from "./fixtures/MockSplitProjection";
+import TestReadModelFactory from "../scripts/components/TestReadModelFactory";
 
 describe("Given a test runner", () => {
 
@@ -23,7 +25,8 @@ describe("Given a test runner", () => {
         projectionRunner = TypeMoq.Mock.ofType(MockProjectionRunner);
         runnerFactory = TypeMoq.Mock.ofType(MockProjectionRunnerFactory);
         objectContainer = TypeMoq.Mock.ofType(MockObjectContainer);
-        subject = new TestRunner<number>(new TestStreamFactory(new MockEventDeserializer()), objectContainer.object, () => null, {}, runnerFactory.object);
+        subject = new TestRunner<number>(new TestStreamFactory(new MockEventDeserializer()), new TestReadModelFactory(),
+            objectContainer.object, () => null, {}, runnerFactory.object);
     });
 
     function publishReadModel(runner, observer, type, payload, date) {
@@ -170,6 +173,53 @@ describe("Given a test runner", () => {
             });
         });
     });
+
+    context("when a split projection is supplied", () => {
+        beforeEach(() => {
+            runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(TypeMoq.It.isAny())).returns(() => new MockSplitProjection());
+            objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
+            subject.of(MockSplitProjection);
+        });
+        context("when it starts", () => {
+            beforeEach(() => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                    publishSplit(projectionRunner.object, observer, {"foo": 10}, "Split", 10, new Date(10));
+                    publishSplit(projectionRunner.object, observer, {"foo": 110}, "Split", 110, new Date(100));
+                }));
+            });
+            it("should replay all the readmodels", async() => {
+                subject
+                    .fromEvents([{
+                        type: "test",
+                        payload: {
+                            id: "foo",
+                            count: 10
+                        },
+                        timestamp: new Date(10)
+                    }])
+                    .withDependencies([{
+                        type: "Dependency",
+                        payload: {
+                            count: 100
+                        },
+                        timestamp: new Date(100)
+                    }])
+                    .stopAt(new Date(100));
+                let state = await subject.run();
+                expect(state["foo"]).to.be(110);
+            });
+        });
+    });
+
+    function publishSplit(runner, observer, state, type, payload, date) {
+        runner.state = state;
+        observer.onNext({
+            type: type,
+            payload: payload,
+            timestamp: date
+        });
+    }
 
     context("when a projection is not supplied", () => {
         it("should throw an error", (done) => {

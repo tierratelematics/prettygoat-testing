@@ -14,6 +14,7 @@ import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
 import TestEvent from "./TestEvent";
 import {map} from "lodash";
+import TestReadModelFactory from "./components/TestReadModelFactory";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
@@ -22,10 +23,12 @@ class TestRunner<T> implements ITestRunner<T> {
     private initialState: T|Dictionary<T>;
     private stopDate: Date;
     private events: TestEvent[] = [];
+    private dependencies: TestEvent[] = [];
     private rawEvents: any[] = [];
     private subscription: Disposable;
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
+                @inject("IReadModelFactory") private readModelFactory: TestReadModelFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
                 @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
                 @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
@@ -54,6 +57,11 @@ class TestRunner<T> implements ITestRunner<T> {
         return this;
     }
 
+    withDependencies(events: TestEvent[]): ITestRunner<T> {
+        this.dependencies = events;
+        return this;
+    }
+
     startWith(initialState: T): ITestRunner<T> {
         this.initialState = initialState;
         return this;
@@ -69,14 +77,8 @@ class TestRunner<T> implements ITestRunner<T> {
 
         return new Promise((resolve, reject) => {
             this.streamFactory.setRawEvents(this.rawEvents);
-            this.streamFactory.setEvents(map<TestEvent, Event>(this.events, event => {
-                return {
-                    type: event.type,
-                    payload: event.payload,
-                    timestamp: event.timestamp,
-                    splitKey: null
-                }
-            }));
+            this.streamFactory.setEvents(this.mapTestEvents(this.events));
+            this.readModelFactory.setReadModels(this.mapTestEvents(this.dependencies));
 
             let runner = this.runnerFactory.create(this.projection),
                 lastState: T|Dictionary<T> = null;
@@ -94,6 +96,17 @@ class TestRunner<T> implements ITestRunner<T> {
     stopAt(date: Date): ITestRunner<T> {
         this.stopDate = date;
         return this;
+    }
+
+    private mapTestEvents(events: TestEvent[]): Event[] {
+        return map<TestEvent, Event>(events, event => {
+            return {
+                type: event.type,
+                payload: event.payload,
+                timestamp: event.timestamp,
+                splitKey: null
+            }
+        })
     }
 
     dispose(): void {
