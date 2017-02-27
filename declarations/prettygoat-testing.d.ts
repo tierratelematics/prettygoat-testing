@@ -19,9 +19,6 @@ declare class TestStreamFactory implements IStreamFactory {
     from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event>;
 
     setEvents(events: Event[]);
-
-    setRawEvents(events: any[]);
-
 }
 
 export class TestRunner<T> implements ITestRunner<T> {

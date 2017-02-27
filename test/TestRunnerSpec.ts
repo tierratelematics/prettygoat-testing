@@ -25,8 +25,8 @@ describe("Given a test runner", () => {
         projectionRunner = TypeMoq.Mock.ofType(MockProjectionRunner);
         runnerFactory = TypeMoq.Mock.ofType(MockProjectionRunnerFactory);
         objectContainer = TypeMoq.Mock.ofType(MockObjectContainer);
-        subject = new TestRunner<number>(new TestStreamFactory(new MockEventDeserializer()), new TestReadModelFactory(),
-            objectContainer.object, () => null, {}, runnerFactory.object);
+        subject = new TestRunner<number>(new TestStreamFactory(), new TestReadModelFactory(),
+            objectContainer.object, () => null, {}, runnerFactory.object, new MockEventDeserializer());
     });
 
     function publishReadModel(runner, observer, type, payload, date) {

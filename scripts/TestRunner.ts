@@ -7,7 +7,8 @@ import {
     IProjectionRunnerFactory,
     ITickScheduler,
     IProjection,
-    Snapshot
+    Snapshot,
+    IEventDeserializer
 } from "prettygoat";
 import {inject, interfaces, injectable} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
@@ -32,7 +33,8 @@ class TestRunner<T> implements ITestRunner<T> {
                 @inject("IObjectContainer") private container: IObjectContainer,
                 @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
                 @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
-                @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory) {
+                @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory,
+                @inject("IEventDeserializer") private deserializer: IEventDeserializer) {
 
     }
 
@@ -76,8 +78,8 @@ class TestRunner<T> implements ITestRunner<T> {
             return Promise.reject(new Error("Cannot run a projection without events"));
 
         return new Promise((resolve, reject) => {
-            this.streamFactory.setRawEvents(this.rawEvents);
-            this.streamFactory.setEvents(this.mapTestEvents(this.events));
+            let events = this.events.length ? this.mapTestEvents(this.events) : this.deserializeEvents(this.rawEvents);
+            this.streamFactory.setEvents(events);
             this.readModelFactory.setReadModels(this.mapTestEvents(this.dependencies));
 
             let runner = this.runnerFactory.create(this.projection),
@@ -107,6 +109,10 @@ class TestRunner<T> implements ITestRunner<T> {
                 splitKey: null
             }
         })
+    }
+
+    private deserializeEvents(events: any[]): Event[] {
+        return map<any, Event>(events, event => this.deserializer.toEvent(event));
     }
 
     dispose(): void {
