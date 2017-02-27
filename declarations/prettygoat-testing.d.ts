@@ -4,7 +4,7 @@ import {Dictionary, IWhen, Event, IStreamFactory, IEventDeserializer, ITickSched
 
 export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
-    fromEvents(TestEvent: TestEvent[]): ITestRunner<T>;
+    fromEvents(events: TestEvent[]): ITestRunner<T>;
     withDependencies(events: TestEvent[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
     startWith(initialState: T): ITestRunner<T>;

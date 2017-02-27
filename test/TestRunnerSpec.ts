@@ -58,10 +58,23 @@ describe("Given a test runner", () => {
         });
 
         context("and a stop date is not provided", () => {
-            it("should throw an error", (done) => {
-                subject.run().catch(error => {
-                    done();
-                });
+            beforeEach(() => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                    publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
+                    publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
+                }));
+            });
+            it("should use the last timestamp of the provided events", async() => {
+                subject
+                    .startWith(50)
+                    .fromEvents([{
+                        type: "test",
+                        payload: 50,
+                        timestamp: new Date(100)
+                    }]);
+                let state = await subject.run();
+
+                expect(state).to.be(100);
             });
         });
 
@@ -82,6 +95,7 @@ describe("Given a test runner", () => {
                     }])
                     .stopAt(new Date(100));
                 let state = await subject.run();
+
                 expect(state).to.be(100);
             });
         });
@@ -115,6 +129,7 @@ describe("Given a test runner", () => {
                     }])
                     .stopAt(new Date(200));
                 let state = await subject.run();
+
                 expect(state).to.be(70);
             });
         });
@@ -140,6 +155,7 @@ describe("Given a test runner", () => {
                     }])
                     .stopAt(new Date(150));
                 let state = await subject.run();
+
                 expect(state).to.be(30);
             });
         });
@@ -169,6 +185,7 @@ describe("Given a test runner", () => {
                     }])
                     .stopAt(new Date(200));
                 let state = await subject.run();
+
                 expect(state).to.be(70);
             });
         });
@@ -207,6 +224,7 @@ describe("Given a test runner", () => {
                     }])
                     .stopAt(new Date(100));
                 let state = await subject.run();
+
                 expect(state["foo"]).to.be(110);
             });
         });
