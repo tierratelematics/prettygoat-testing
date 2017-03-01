@@ -4,13 +4,10 @@ import * as TypeMoq from "typemoq";
 import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
-import MockObjectContainer from "./fixtures/MockObjectContainer";
-import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, Event} from "prettygoat";
-import MockProjectionRunnerFactory from "./fixtures/MockProjectionRunnerFactory";
+import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, Event, IEventDeserializer} from "prettygoat";
 import TestStreamFactory from "../scripts/components/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rx";
-import MockEventDeserializer from "./fixtures/MockEventDeserializer";
 import MockSplitProjection from "./fixtures/MockSplitProjection";
 import TestReadModelFactory from "../scripts/components/TestReadModelFactory";
 
@@ -20,13 +17,16 @@ describe("Given a test runner", () => {
     let objectContainer: TypeMoq.IMock<IObjectContainer>;
     let runnerFactory: TypeMoq.IMock<IProjectionRunnerFactory>;
     let projectionRunner: TypeMoq.IMock<IProjectionRunner<number>>;
+    let deserializer : TypeMoq.IMock<IEventDeserializer>;
 
     beforeEach(() => {
         projectionRunner = TypeMoq.Mock.ofType(MockProjectionRunner);
-        runnerFactory = TypeMoq.Mock.ofType(MockProjectionRunnerFactory);
-        objectContainer = TypeMoq.Mock.ofType(MockObjectContainer);
+        runnerFactory = TypeMoq.Mock.ofType<IProjectionRunnerFactory>();
+        objectContainer = TypeMoq.Mock.ofType<IObjectContainer>();
+        deserializer = TypeMoq.Mock.ofType<IEventDeserializer>();
+        deserializer.setup(d => d.toEvent(TypeMoq.It.isAny())).returns(() => null);
         subject = new TestRunner<number>(new TestStreamFactory(), new TestReadModelFactory(),
-            objectContainer.object, () => null, {}, runnerFactory.object, new MockEventDeserializer());
+            objectContainer.object, () => null, {}, runnerFactory.object, deserializer.object);
     });
 
     function publishReadModel(runner, observer, type, payload, date) {
