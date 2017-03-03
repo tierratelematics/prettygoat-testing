@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import expect = require("expect.js");
-import * as TypeMoq from "typemoq";
+import {IMock, Mock, Times, It} from "typemoq";
 import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
@@ -14,17 +14,17 @@ import TestReadModelFactory from "../scripts/components/TestReadModelFactory";
 describe("Given a test runner", () => {
 
     let subject: ITestRunner<number>;
-    let objectContainer: TypeMoq.IMock<IObjectContainer>;
-    let runnerFactory: TypeMoq.IMock<IProjectionRunnerFactory>;
-    let projectionRunner: TypeMoq.IMock<IProjectionRunner<number>>;
-    let deserializer : TypeMoq.IMock<IEventDeserializer>;
+    let objectContainer: IMock<IObjectContainer>;
+    let runnerFactory: IMock<IProjectionRunnerFactory>;
+    let projectionRunner: IMock<IProjectionRunner<number>>;
+    let deserializer : IMock<IEventDeserializer>;
 
     beforeEach(() => {
-        projectionRunner = TypeMoq.Mock.ofType(MockProjectionRunner);
-        runnerFactory = TypeMoq.Mock.ofType<IProjectionRunnerFactory>();
-        objectContainer = TypeMoq.Mock.ofType<IObjectContainer>();
-        deserializer = TypeMoq.Mock.ofType<IEventDeserializer>();
-        deserializer.setup(d => d.toEvent(TypeMoq.It.isAny())).returns(() => null);
+        projectionRunner = Mock.ofType(MockProjectionRunner);
+        runnerFactory = Mock.ofType<IProjectionRunnerFactory>();
+        objectContainer = Mock.ofType<IObjectContainer>();
+        deserializer = Mock.ofType<IEventDeserializer>();
+        deserializer.setup(d => d.toEvent(It.isAny())).returns(() => null);
         subject = new TestRunner<number>(new TestStreamFactory(), new TestReadModelFactory(),
             objectContainer.object, () => null, {}, runnerFactory.object, deserializer.object);
     });
@@ -40,20 +40,20 @@ describe("Given a test runner", () => {
 
     context("when a projection is already registered", () => {
         beforeEach(() => {
-            runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
-            objectContainer.setup(o => o.get(TypeMoq.It.isAny())).returns(() => new MockProjection());
+            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockProjection());
             objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
         });
         it("should unbind it", () => {
             subject.of(MockProjection);
-            objectContainer.verify(o => o.remove("prettygoat:definitions:test"), TypeMoq.Times.once());
+            objectContainer.verify(o => o.remove("prettygoat:definitions:test"), Times.once());
         });
     });
 
     context("when a projection is supplied", () => {
         beforeEach(() => {
-            runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
-            objectContainer.setup(o => o.get(TypeMoq.It.isAny())).returns(() => new MockProjection());
+            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockProjection());
             subject.of(MockProjection);
         });
 
@@ -193,8 +193,8 @@ describe("Given a test runner", () => {
 
     context("when a split projection is supplied", () => {
         beforeEach(() => {
-            runnerFactory.setup(r => r.create(TypeMoq.It.isAny())).returns(() => projectionRunner.object);
-            objectContainer.setup(o => o.get(TypeMoq.It.isAny())).returns(() => new MockSplitProjection());
+            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockSplitProjection());
             objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
             subject.of(MockSplitProjection);
         });
