@@ -1,6 +1,14 @@
-#Prettygoat-testing
+# Prettygoat-testing
 
-##How to use
+Unit test prettygoat's projections without Cassandra.
+
+## Installation
+
+`
+$ npm install prettygoat-testing
+`
+
+## Usage
 
 ```typescript
 import {TestEnvironment, ITestRunner} from "prettygoat-testing";
