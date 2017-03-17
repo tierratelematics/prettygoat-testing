@@ -21,6 +21,5 @@ deploy:
   api_key:
     secure: mI2eBUnnFH4kIfxXJ5r9OUMII7bySP44NK675+ojVcO1V316MDRrcTAFlN8hIFYGYB4p8ckF+D8O8NHkg8B0cTUi2nZZ9Itg0hfIQqgpbFMWtrTiJBeoJlq636AAx/20M7+Gad8AxVeRDuIPMqYneNiHy7IBmo5R6F+5GHS672y3G4Z2QXgfY0f2SD32WiUjS8xw1PehTT3549WLVznelu7/n9vQDI0G7DVvk1EBMiYszmmgmgj6VY5UcBkqbNoWD5/Aohw2uK10YIOqOZhr3XbV/KIkNbEb4W7KTx+0J2hI3fe3K+aYJRxcPPYc8dHMhK0fVTcM6bsKIo9ua5ML0Uby8aYwV1hMNatHyF6yO0y6SyzbPuP5TmhMDBft0gpzzeEfOvc8U0RLk9HV0v0lHYFndX+PWLwix2xVqmaWo6xZxMq86+hFa/IRJDcanRWzaMxZCjdtgjleRb6FoaU5Hdi4ifXDs6FA1OowolPjjIfnq22eJHCpgx410OmsUrdT6H1jvFP8HhuegnzSTTs1jJr+4hTaQgHXygVX2B590j+UaKAaXOAjdfZPt1U/5j7oMfkDzxr+BQNoD7NWxBIVFOgPyDkNrf5QKxp7kdiFo/6OUQBco9x/DnzjDrbYn0d7ATnDMnWCQDvzz0bF8zOiq5cDRNjJZbUwRa5zwrpDd6E=
   on:
-    branch: master
     repo: tierratelematics/prettygoat-testing
-    tags: false
+    tags: true
