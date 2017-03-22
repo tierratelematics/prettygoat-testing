@@ -11,10 +11,14 @@ class TestModule implements IModule {
 
     modules = (container: interfaces.Container) => {
         container.rebind("IDateRetriever").to(TestDateRetriever).inSingletonScope();
-        container.rebind("IStreamFactory").to(TestStreamFactory).inSingletonScope();
         container.rebind("IReadModelFactory").to(TestReadModelFactory).inSingletonScope();
         container.rebind("IProjectionRunnerFactory").to(TestProjectionRunnerFactory).inSingletonScope();
         container.bind<ITestRunner<any>>("ITestRunner").to(TestRunner);
+        try {
+            container.rebind("IStreamFactory").to(TestStreamFactory).inSingletonScope();
+        } catch (error) {
+            container.bind("IStreamFactory").to(TestStreamFactory).inSingletonScope();
+        }
     };
 
     register(registry: IProjectionRegistry, serviceLocator?: IServiceLocator, overrides?: any): void {
