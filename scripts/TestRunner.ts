@@ -10,7 +10,7 @@ import {
     Snapshot,
     IEventDeserializer
 } from "prettygoat";
-import {inject, interfaces, injectable} from "inversify";
+import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
 import TestEvent from "./TestEvent";
@@ -34,7 +34,7 @@ class TestRunner<T> implements ITestRunner<T> {
                 @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
                 @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
                 @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory,
-                @inject("IEventDeserializer") private deserializer: IEventDeserializer) {
+                @inject("IEventDeserializer") @optional() private deserializer?: IEventDeserializer) {
 
     }
 
