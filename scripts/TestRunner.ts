@@ -14,7 +14,7 @@ import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
 import TestEvent from "./TestEvent";
-import {map, last} from "lodash";
+import {map, last, cloneDeep} from "lodash";
 import TestReadModelFactory from "./components/TestReadModelFactory";
 
 @injectable()
@@ -84,14 +84,17 @@ class TestRunner<T> implements ITestRunner<T> {
             let runner = this.runnerFactory.create(this.projection),
                 lastState: T|Dictionary<T> = null;
             this.subscription = runner.notifications().subscribe(readModel => {
-                if (+readModel.timestamp === +this.stopDate)
-                    resolve(runner.state);
-                if (+readModel.timestamp > +this.stopDate)
-                    resolve(lastState);
+                if (+readModel.timestamp === +this.stopDate) this.flushState(resolve, runner.state);
+                if (+readModel.timestamp > +this.stopDate) this.flushState(resolve, lastState);
                 lastState = runner.state;
             }, error => reject(error));
             runner.run(this.initialState ? new Snapshot(this.initialState, null) : null);
         });
+    }
+
+    private flushState(resolve: Function, state: T|Dictionary<T>) {
+        resolve(cloneDeep(state));
+        this.subscription.dispose();
     }
 
     stopAt(date: Date): ITestRunner<T> {
