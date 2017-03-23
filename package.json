@@ -8,6 +8,7 @@
     "typemoq": "~1.2.1"
   },
   "dependencies": {
+    "@types/lodash": "4.14.54",
     "@types/node": "~6.0.52",
     "@types/socket.io": "~1.4.27",
     "inversify": "~3.1.0",
