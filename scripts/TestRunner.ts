@@ -92,16 +92,6 @@ class TestRunner<T> implements ITestRunner<T> {
         });
     }
 
-    private flushState(resolve: Function, state: T|Dictionary<T>) {
-        resolve(cloneDeep(state));
-        this.subscription.dispose();
-    }
-
-    stopAt(date: Date): ITestRunner<T> {
-        this.stopDate = date;
-        return this;
-    }
-
     private mapTestEvents(events: TestEvent[]): Event[] {
         return map<TestEvent, Event>(events, event => {
             return {
@@ -115,6 +105,16 @@ class TestRunner<T> implements ITestRunner<T> {
 
     private deserializeEvents(events: any[]): Event[] {
         return map<any, Event>(events, event => this.deserializer.toEvent(event));
+    }
+
+    private flushState(resolve: Function, state: T|Dictionary<T>) {
+        resolve(cloneDeep(state));
+        this.subscription.dispose();
+    }
+
+    stopAt(date: Date): ITestRunner<T> {
+        this.stopDate = date;
+        return this;
     }
 
     dispose(): void {
