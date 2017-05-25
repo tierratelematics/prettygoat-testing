@@ -1,3 +1,7 @@
+# 0.4.0
+
+Bump to prettygoat 3.3.0
+
 # 0.3.3
 
 Clone the returned projection state in order to allow the functioning of stopAt
