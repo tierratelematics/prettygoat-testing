@@ -1,3 +1,7 @@
+# 0.4.1
+
+Fix for some tests not exiting
+
 # 0.4.0
 
 Bump to prettygoat 3.3.0
