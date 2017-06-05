@@ -32,7 +32,7 @@ describe("Given a projection", () => {
         it("should do this", async () => {
             const events = require("./fixtures/events.json");
             let state = await runner
-                .of(Projection)
+                .of(Projection) // Or pass an already newed projection
                 .fromEvents(events)
                 .stopAt(new Date(400))
                 .run();

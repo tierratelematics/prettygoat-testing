@@ -12,7 +12,7 @@ import {
 } from "prettygoat";
 
 export interface ITestRunner<T> extends IDisposable {
-    of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
+    of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T>;
     fromEvents(events: TestEvent[]): ITestRunner<T>;
     withDependencies(events: TestEvent[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
