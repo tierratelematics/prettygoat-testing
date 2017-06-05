@@ -27,6 +27,7 @@ describe("Given a test runner", () => {
         deserializer.setup(d => d.toEvent(It.isAny())).returns(() => null);
         subject = new TestRunner<number>(new TestStreamFactory(), new TestReadModelFactory(),
             objectContainer.object, () => null, {}, runnerFactory.object, deserializer.object);
+        runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
     });
 
     function publishReadModel(runner, observer, type, payload, date) {
@@ -52,7 +53,6 @@ describe("Given a test runner", () => {
 
     context("when a projection is supplied", () => {
         beforeEach(() => {
-            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
             objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockProjection());
             subject.of(MockProjection);
         });
@@ -64,7 +64,7 @@ describe("Given a test runner", () => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
                 }));
             });
-            it("should use the last timestamp of the provided events", async() => {
+            it("should use the last timestamp of the provided events", async () => {
                 subject
                     .startWith(50)
                     .fromEvents([{
@@ -85,7 +85,7 @@ describe("Given a test runner", () => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
                 }));
             });
-            it("should run the projection starting from that state", async() => {
+            it("should run the projection starting from that state", async () => {
                 subject
                     .startWith(50)
                     .fromEvents([{
@@ -116,7 +116,7 @@ describe("Given a test runner", () => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
-            it("should process those events", async() => {
+            it("should process those events", async () => {
                 subject
                     .fromEvents([{
                         type: "test",
@@ -142,7 +142,7 @@ describe("Given a test runner", () => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
-            it("should stop the projection", async() => {
+            it("should stop the projection", async () => {
                 subject
                     .fromEvents([{
                         type: "test",
@@ -168,7 +168,7 @@ describe("Given a test runner", () => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
                 }));
             });
-            it("should parse and process those events", async() => {
+            it("should parse and process those events", async () => {
                 subject
                     .fromRawEvents([{
                         payload: {
@@ -191,9 +191,35 @@ describe("Given a test runner", () => {
         });
     });
 
+    context("when an already built projection is supplied", () => {
+        beforeEach(() => {
+            projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
+                publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
+                publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
+            }));
+        });
+        it("should work the same as the other way", async () => {
+            let state = await subject
+                .of(new MockProjection())
+                .fromEvents([{
+                    type: "test",
+                    payload: 20,
+                    timestamp: new Date(100)
+                }, {
+                    type: "test",
+                    payload: 40,
+                    timestamp: new Date(200)
+                }])
+                .stopAt(new Date(200))
+                .run();
+
+            expect(state).to.be(70);
+        });
+    });
+
     context("when a split projection is supplied", () => {
         beforeEach(() => {
-            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
             objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockSplitProjection());
             objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
             subject.of(MockSplitProjection);
@@ -205,7 +231,7 @@ describe("Given a test runner", () => {
                     publishSplit(projectionRunner.object, observer, {"foo": 110}, "Split", 110, new Date(100));
                 }));
             });
-            it("should replay all the readmodels", async() => {
+            it("should replay all the readmodels", async () => {
                 subject
                     .fromEvents([{
                         type: "test",

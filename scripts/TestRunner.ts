@@ -14,7 +14,7 @@ import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./components/TestStreamFactory";
 import {Disposable} from "rx";
 import TestEvent from "./TestEvent";
-import {map, last, cloneDeep} from "lodash";
+import {map, last, cloneDeep, isFunction} from "lodash";
 import TestReadModelFactory from "./components/TestReadModelFactory";
 
 @injectable()
@@ -38,13 +38,19 @@ class TestRunner<T> implements ITestRunner<T> {
 
     }
 
-    of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T> {
-        const key = `prettygoat:definitions:test`;
-        if (this.container.contains(key))
-            this.container.remove(key);
-        this.container.set(key, constructor);
+    of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T> {
         let tickScheduler = <ITickScheduler>this.tickSchedulerFactory();
-        this.projection = this.container.get<IProjectionDefinition<T>>(key).define(tickScheduler);
+        let projectionDefinition: IProjectionDefinition<T>;
+        if (!isFunction(constructor)) {
+            projectionDefinition = <IProjectionDefinition<T>> constructor;
+        } else {
+            const key = `prettygoat:definitions:test`;
+            if (this.container.contains(key))
+                this.container.remove(key);
+            this.container.set(key, constructor);
+            projectionDefinition = this.container.get<IProjectionDefinition<T>>(key);
+        }
+        this.projection = projectionDefinition.define(tickScheduler);
         this.tickSchedulerHolder[this.projection.name] = tickScheduler;
         return this;
     }
