@@ -10,15 +10,13 @@ import {
     IProjectionStreamGenerator,
 } from "prettygoat";
 import PublishProjectionRunner from "./PublishProjectionRunner";
-import {ISubject} from "rx";
 
 @injectable()
 class TestProjectionRunnerFactory implements IProjectionRunnerFactory {
 
     constructor(@inject("IProjectionStreamGenerator") private streamGenerator: IProjectionStreamGenerator,
                 @inject("IReadModelFactory") private readModelFactory: IReadModelFactory,
-                @inject("IProjectionRunnerHolder") private holder: Dictionary<IProjectionRunner<any>>,
-                @inject("RealtimeNotifier") private realtimeNotifier: ISubject<string>) {
+                @inject("IProjectionRunnerHolder") private holder: Dictionary<IProjectionRunner<any>>) {
 
     }
 
@@ -26,10 +24,10 @@ class TestProjectionRunnerFactory implements IProjectionRunnerFactory {
         let definitionMatcher = new Matcher(projection.definition);
         let projectionRunner: IProjectionRunner<T>;
         if (!projection.split)
-            projectionRunner = new PublishProjectionRunner<T>(projection, this.streamGenerator, definitionMatcher, this.readModelFactory, this.realtimeNotifier);
+            projectionRunner = new PublishProjectionRunner<T>(projection, this.streamGenerator, definitionMatcher, this.readModelFactory);
         else
             projectionRunner = new SplitProjectionRunner<T>(projection, this.streamGenerator, definitionMatcher,
-                new Matcher(projection.split), this.readModelFactory, this.realtimeNotifier);
+                new Matcher(projection.split), this.readModelFactory);
         this.holder[projection.name] = projectionRunner;
         return projectionRunner;
     }
