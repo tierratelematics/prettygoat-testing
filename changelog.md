@@ -1,3 +1,7 @@
+# 1.1.0
+
+Add support for using already built projections
+
 # 1.0.0
 
 Bump to prettygoat 3.4.0
