@@ -99,8 +99,8 @@ class TestRunner<T> implements ITestRunner<T> {
                 payload: event.payload,
                 timestamp: event.timestamp,
                 splitKey: null
-            }
-        })
+            };
+        });
     }
 
     private deserializeEvents(events: any[]): Event[] {
