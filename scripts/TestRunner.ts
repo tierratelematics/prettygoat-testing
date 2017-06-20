@@ -89,7 +89,8 @@ class TestRunner<T> implements ITestRunner<T> {
 
             let runner = this.runnerFactory.create(this.projection),
                 lastState: T|Dictionary<T> = null;
-            this.subscription = runner.notifications().subscribe(readModel => {
+            this.subscription = runner.notifications().subscribe(notification => {
+                let readModel = notification[0];
                 if (+readModel.timestamp === +this.stopDate) this.flushState(resolve, runner.state);
                 if (+readModel.timestamp > +this.stopDate) this.flushState(resolve, lastState);
                 lastState = runner.state;
