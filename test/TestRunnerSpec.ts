@@ -5,7 +5,7 @@ import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
 import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, Event, IEventDeserializer, RunnerNotification} from "prettygoat";
-import TestStreamFactory from "../scripts/components/TestStreamFactory";
+import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rx";
 import MockSplitProjection from "./fixtures/MockSplitProjection";

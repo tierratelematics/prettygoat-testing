@@ -1,20 +1,18 @@
 import {interfaces} from "inversify";
 import {Observable, IDisposable} from "rx";
 import {
-    Dictionary,
-    IWhen,
+    WhenBlock,
     Event,
     IStreamFactory,
     IEventDeserializer,
-    ITickScheduler,
     IModule,
     IProjectionDefinition
 } from "prettygoat";
 
 export interface ITestRunner<T> extends IDisposable {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T>;
-    fromEvents(events: TestEvent[]): ITestRunner<T>;
-    withDependencies(events: TestEvent[]): ITestRunner<T>;
+    fromEvents(events: Event[]): ITestRunner<T>;
+    withDependencies(events: Event[]): ITestRunner<T>;
     fromRawEvents(events: any[]): ITestRunner<T>;
     startWith(initialState: T): ITestRunner<T>;
     stopAt(date: Date): ITestRunner<T>;
@@ -25,7 +23,7 @@ declare class TestStreamFactory implements IStreamFactory {
 
     constructor(deserializer: IEventDeserializer);
 
-    from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event>;
+    from(lastEvent: Date, completions?: Observable<string>, definition?: WhenBlock<any>): Observable<Event>;
 
     setEvents(events: Event[]);
 }
@@ -34,9 +32,9 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
 
-    fromEvents(events: TestEvent[]): ITestRunner<T>;
+    fromEvents(events: Event[]): ITestRunner<T>;
 
-    withDependencies(events: TestEvent[]): ITestRunner<T>;
+    withDependencies(events: Event[]): ITestRunner<T>;
 
     fromRawEvents(events: any[]): ITestRunner<T>;
 
@@ -56,7 +54,7 @@ export class TestEnvironment {
     runner<T>(): ITestRunner<T>;
 }
 
-export class TestEvent {
+export class Event {
     type: string;
     payload: any;
     timestamp: Date;

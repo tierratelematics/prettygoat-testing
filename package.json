@@ -14,7 +14,7 @@
     "inversify": "~3.1.0",
     "lodash": "~4.13.1",
     "reflect-metadata": "0.1.8",
-    "rx": "~4.1.0"
+    "rxjs": "~5.4.2"
   },
   "peerDependencies": {
     "prettygoat": "^3.4.0"
