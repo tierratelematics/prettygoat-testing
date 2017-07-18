@@ -4,7 +4,7 @@ import {IMock, Mock, Times, It} from "typemoq";
 import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
-import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, Event, IEventDeserializer} from "prettygoat";
+import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, IEventDeserializer} from "prettygoat";
 import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rxjs";
@@ -30,7 +30,7 @@ describe("Given a test runner", () => {
 
     function publishReadModel(runner, observer, type, payload, date) {
         runner.state = payload;
-        observer.onNext([{
+        observer.next([{
             type: type,
             payload: payload,
             timestamp: date
