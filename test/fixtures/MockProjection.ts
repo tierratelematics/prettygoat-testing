@@ -1,6 +1,5 @@
-import {IProjectionDefinition, IProjection, Projection} from "prettygoat";
+import {IProjectionDefinition, IProjection} from "prettygoat";
 
-@Projection("Mock")
 export default class MockProjection implements IProjectionDefinition<number> {
 
     define(): IProjection<number> {
@@ -18,8 +17,8 @@ export default class MockProjection implements IProjectionDefinition<number> {
                     s = s + e.count;
                     return s;
                 }
-            }
-        }
+            },
+            publish: {}
+        };
     }
-
 }
