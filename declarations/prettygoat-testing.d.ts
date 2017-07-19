@@ -1,5 +1,6 @@
 import {interfaces} from "inversify";
-import {Observable, IDisposable} from "rx";
+import {Observable} from "rxjs";
+import {ISubscription} from "rxjs/Subscription";
 import {
     WhenBlock,
     Event,
@@ -9,7 +10,7 @@ import {
     IProjectionDefinition
 } from "prettygoat";
 
-export interface ITestRunner<T> extends IDisposable {
+export interface ITestRunner<T> extends ISubscription {
     of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T>;
     fromEvents(events: Event[]): ITestRunner<T>;
     withDependencies(events: Event[]): ITestRunner<T>;
@@ -44,7 +45,7 @@ export class TestRunner<T> implements ITestRunner<T> {
 
     stopAt(date: Date): ITestRunner<T>;
 
-    dispose(): void;
+    unsubscribe(): void;
 }
 
 export class TestEnvironment {

@@ -1,5 +1,5 @@
-import {IStreamFactory, Event, IWhen} from "prettygoat";
-import {Observable} from "rx";
+import {IStreamFactory, Event, WhenBlock} from "prettygoat";
+import {Observable} from "rxjs";
 import {injectable} from "inversify";
 import {isString} from "lodash";
 
@@ -8,7 +8,7 @@ class TestStreamFactory implements IStreamFactory {
 
     private events: Event[] = [];
 
-    from(lastEvent: Date, completions?: Observable<string>, definition?: IWhen<any>): Observable<Event> {
+    from(lastEvent: Date, completions?: Observable<string>, definition?: WhenBlock<any>): Observable<Event> {
         return Observable
             .from(this.events)
             .map(event => {

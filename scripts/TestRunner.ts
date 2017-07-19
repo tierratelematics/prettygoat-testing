@@ -12,18 +12,19 @@ import {
 } from "prettygoat";
 import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./TestStreamFactory";
-import {Disposable} from "rx";
+import {ISubscription} from "rxjs/Subscription";
 import {map, last, cloneDeep, isFunction} from "lodash";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
 
+    closed = false;
     private projection: IProjection<T>;
     private initialState: T;
     private stopDate: Date;
     private events: Event[] = [];
     private rawEvents: any[] = [];
-    private subscription: Disposable;
+    private subscription: ISubscription;
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
@@ -95,7 +96,7 @@ class TestRunner<T> implements ITestRunner<T> {
 
     private flushState(resolve: Function, state: T) {
         resolve(cloneDeep(state));
-        this.subscription.dispose();
+        this.subscription.unsubscribe();
     }
 
     stopAt(date: Date): ITestRunner<T> {
@@ -104,8 +105,9 @@ class TestRunner<T> implements ITestRunner<T> {
     }
 
     unsubscribe(): void {
+        this.closed = true;
         if (this.subscription) {
-            this.subscription.dispose();
+            this.subscription.unsubscribe();
             this.subscription = null;
         }
     }
