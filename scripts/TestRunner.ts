@@ -11,25 +11,22 @@ import {
     IEventDeserializer
 } from "prettygoat";
 import {inject, interfaces, injectable, optional} from "inversify";
-import TestStreamFactory from "./components/TestStreamFactory";
-import {Disposable} from "rx";
-import TestEvent from "./TestEvent";
+import TestStreamFactory from "./TestStreamFactory";
+import {ISubscription} from "rxjs/Subscription";
 import {map, last, cloneDeep, isFunction} from "lodash";
-import TestReadModelFactory from "./components/TestReadModelFactory";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
 
+    closed = false;
     private projection: IProjection<T>;
-    private initialState: T|Dictionary<T>;
+    private initialState: T;
     private stopDate: Date;
-    private events: TestEvent[] = [];
-    private dependencies: TestEvent[] = [];
+    private events: Event[] = [];
     private rawEvents: any[] = [];
-    private subscription: Disposable;
+    private subscription: ISubscription;
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
-                @inject("IReadModelFactory") private readModelFactory: TestReadModelFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
                 @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
                 @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
@@ -55,18 +52,13 @@ class TestRunner<T> implements ITestRunner<T> {
         return this;
     }
 
-    fromEvents(events: TestEvent[]): ITestRunner<T> {
+    fromEvents(events: Event[]): ITestRunner<T> {
         this.events = events;
         return this;
     }
 
     fromRawEvents(events: any[]): ITestRunner<T> {
         this.rawEvents = events;
-        return this;
-    }
-
-    withDependencies(events: TestEvent[]): ITestRunner<T> {
-        this.dependencies = events;
         return this;
     }
 
@@ -82,14 +74,14 @@ class TestRunner<T> implements ITestRunner<T> {
             return Promise.reject(new Error("Cannot run a projection without events"));
 
         return new Promise((resolve, reject) => {
-            let events = this.events.length ? this.mapTestEvents(this.events) : this.deserializeEvents(this.rawEvents);
+            let events = this.events.length ? this.events : this.deserializeEvents(this.rawEvents);
             if (!this.stopDate) this.stopDate = last(events).timestamp;
             this.streamFactory.setEvents(events);
-            this.readModelFactory.setReadModels(this.mapTestEvents(this.dependencies));
 
             let runner = this.runnerFactory.create(this.projection),
-                lastState: T|Dictionary<T> = null;
-            this.subscription = runner.notifications().subscribe(readModel => {
+                lastState: T = null;
+            this.subscription = runner.notifications().subscribe(notification => {
+                let readModel = notification[0];
                 if (+readModel.timestamp === +this.stopDate) this.flushState(resolve, runner.state);
                 if (+readModel.timestamp > +this.stopDate) this.flushState(resolve, lastState);
                 lastState = runner.state;
@@ -98,24 +90,13 @@ class TestRunner<T> implements ITestRunner<T> {
         });
     }
 
-    private mapTestEvents(events: TestEvent[]): Event[] {
-        return map<TestEvent, Event>(events, event => {
-            return {
-                type: event.type,
-                payload: event.payload,
-                timestamp: event.timestamp,
-                splitKey: null
-            };
-        });
-    }
-
     private deserializeEvents(events: any[]): Event[] {
         return map<any, Event>(events, event => this.deserializer.toEvent(event));
     }
 
-    private flushState(resolve: Function, state: T|Dictionary<T>) {
+    private flushState(resolve: Function, state: T) {
         resolve(cloneDeep(state));
-        this.subscription.dispose();
+        this.subscription.unsubscribe();
     }
 
     stopAt(date: Date): ITestRunner<T> {
@@ -123,9 +104,10 @@ class TestRunner<T> implements ITestRunner<T> {
         return this;
     }
 
-    dispose(): void {
+    unsubscribe(): void {
+        this.closed = true;
         if (this.subscription) {
-            this.subscription.dispose();
+            this.subscription.unsubscribe();
             this.subscription = null;
         }
     }

@@ -4,12 +4,10 @@ import {IMock, Mock, Times, It} from "typemoq";
 import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
-import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, Event, IEventDeserializer} from "prettygoat";
-import TestStreamFactory from "../scripts/components/TestStreamFactory";
+import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, IEventDeserializer} from "prettygoat";
+import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
-import {Observable} from "rx";
-import MockSplitProjection from "./fixtures/MockSplitProjection";
-import TestReadModelFactory from "../scripts/components/TestReadModelFactory";
+import {Observable} from "rxjs";
 
 describe("Given a test runner", () => {
 
@@ -17,7 +15,7 @@ describe("Given a test runner", () => {
     let objectContainer: IMock<IObjectContainer>;
     let runnerFactory: IMock<IProjectionRunnerFactory>;
     let projectionRunner: IMock<IProjectionRunner<number>>;
-    let deserializer : IMock<IEventDeserializer>;
+    let deserializer: IMock<IEventDeserializer>;
 
     beforeEach(() => {
         projectionRunner = Mock.ofType(MockProjectionRunner);
@@ -25,18 +23,18 @@ describe("Given a test runner", () => {
         objectContainer = Mock.ofType<IObjectContainer>();
         deserializer = Mock.ofType<IEventDeserializer>();
         deserializer.setup(d => d.toEvent(It.isAny())).returns(() => null);
-        subject = new TestRunner<number>(new TestStreamFactory(), new TestReadModelFactory(),
-            objectContainer.object, () => null, {}, runnerFactory.object, deserializer.object);
+        subject = new TestRunner<number>(new TestStreamFactory(), objectContainer.object, () => null, {},
+            runnerFactory.object, deserializer.object);
         runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
     });
 
     function publishReadModel(runner, observer, type, payload, date) {
         runner.state = payload;
-        observer.onNext({
+        observer.next([{
             type: type,
             payload: payload,
             timestamp: date
-        });
+        }, null]);
     }
 
     context("when a projection is already registered", () => {
@@ -59,7 +57,7 @@ describe("Given a test runner", () => {
 
         context("and a stop date is not provided", () => {
             beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
                     publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
                 }));
@@ -80,7 +78,7 @@ describe("Given a test runner", () => {
 
         context("and an initial state is given", () => {
             beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
                     publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
                 }));
@@ -110,7 +108,7 @@ describe("Given a test runner", () => {
 
         context("when a list of events is given", () => {
             beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
                     publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
@@ -136,7 +134,7 @@ describe("Given a test runner", () => {
 
         context("when the projection is running past the stop date", () => {
             beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
                     publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
@@ -162,7 +160,7 @@ describe("Given a test runner", () => {
 
         context("when a list of raw events is given", () => {
             beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                     publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
                     publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
                     publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
@@ -193,7 +191,7 @@ describe("Given a test runner", () => {
 
     context("when an already built projection is supplied", () => {
         beforeEach(() => {
-            projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
+            projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
                 publishReadModel(projectionRunner.object, observer, "Mock", 10, new Date(1));
                 publishReadModel(projectionRunner.object, observer, "Mock", 30, new Date(100));
                 publishReadModel(projectionRunner.object, observer, "Mock", 70, new Date(200));
@@ -217,53 +215,6 @@ describe("Given a test runner", () => {
             expect(state).to.be(70);
         });
     });
-
-    context("when a split projection is supplied", () => {
-        beforeEach(() => {
-            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockSplitProjection());
-            objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
-            subject.of(MockSplitProjection);
-        });
-        context("when it starts", () => {
-            beforeEach(() => {
-                projectionRunner.setup(p => p.notifications()).returns(() => Observable.create<Event>(observer => {
-                    publishSplit(projectionRunner.object, observer, {"foo": 10}, "Split", 10, new Date(10));
-                    publishSplit(projectionRunner.object, observer, {"foo": 110}, "Split", 110, new Date(100));
-                }));
-            });
-            it("should replay all the readmodels", async () => {
-                subject
-                    .fromEvents([{
-                        type: "test",
-                        payload: {
-                            id: "foo",
-                            count: 10
-                        },
-                        timestamp: new Date(10)
-                    }])
-                    .withDependencies([{
-                        type: "Dependency",
-                        payload: {
-                            count: 100
-                        },
-                        timestamp: new Date(100)
-                    }])
-                    .stopAt(new Date(100));
-                let state = await subject.run();
-
-                expect(state["foo"]).to.be(110);
-            });
-        });
-    });
-
-    function publishSplit(runner, observer, state, type, payload, date) {
-        runner.state = state;
-        observer.onNext({
-            type: type,
-            payload: payload,
-            timestamp: date
-        });
-    }
 
     context("when a projection is not supplied", () => {
         it("should throw an error", (done) => {

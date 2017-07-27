@@ -1,8 +1,9 @@
-import {IProjectionRunner, ProjectionStats, Snapshot, Dictionary} from "prettygoat";
+import {IProjectionRunner, ProjectionStats, Snapshot} from "prettygoat";
 
 class MockProjectionRunner<T> implements IProjectionRunner<T> {
-    state:T;
+    state: T;
     stats = new ProjectionStats();
+    closed = false;
 
     constructor() {
 
@@ -12,14 +13,14 @@ class MockProjectionRunner<T> implements IProjectionRunner<T> {
         return null;
     }
 
-    run(snapshot?:Snapshot<T|Dictionary<T>>):void {
+    run(snapshot?: Snapshot<T>): void {
 
     }
 
-    stop():void {
+    stop(): void {
     }
 
-    dispose():void {
+    unsubscribe(): void {
 
     }
 
