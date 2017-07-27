@@ -31,6 +31,8 @@ declare class TestStreamFactory implements IStreamFactory {
 
 export class TestRunner<T> implements ITestRunner<T> {
 
+    closed: boolean;
+
     of(constructor: interfaces.Newable<IProjectionDefinition<T>>): ITestRunner<T>;
 
     fromEvents(events: Event[]): ITestRunner<T>;
