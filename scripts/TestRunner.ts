@@ -3,9 +3,7 @@ import {
     IProjectionDefinition,
     Event,
     IObjectContainer,
-    Dictionary,
     IProjectionRunnerFactory,
-    ITickScheduler,
     IProjection,
     Snapshot,
     IEventDeserializer
@@ -28,15 +26,12 @@ class TestRunner<T> implements ITestRunner<T> {
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
                 @inject("IObjectContainer") private container: IObjectContainer,
-                @inject("Factory<ITickScheduler>") private tickSchedulerFactory: interfaces.Factory<ITickScheduler>,
-                @inject("ITickSchedulerHolder") private tickSchedulerHolder: Dictionary<ITickScheduler>,
                 @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory,
                 @inject("IEventDeserializer") @optional() private deserializer?: IEventDeserializer) {
 
     }
 
     of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T> {
-        let tickScheduler = <ITickScheduler>this.tickSchedulerFactory();
         let projectionDefinition: IProjectionDefinition<T>;
         if (!isFunction(constructor)) {
             projectionDefinition = <IProjectionDefinition<T>> constructor;
@@ -47,8 +42,7 @@ class TestRunner<T> implements ITestRunner<T> {
             this.container.set(key, constructor);
             projectionDefinition = this.container.get<IProjectionDefinition<T>>(key);
         }
-        this.projection = projectionDefinition.define(tickScheduler);
-        this.tickSchedulerHolder[this.projection.name] = tickScheduler;
+        this.projection = projectionDefinition.define();
         return this;
     }
 
