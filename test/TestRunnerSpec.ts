@@ -1,30 +1,30 @@
 import "reflect-metadata";
 import expect = require("expect.js");
 import {IMock, Mock, Times, It} from "typemoq";
-import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
-import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, IEventDeserializer} from "prettygoat";
+import {IProjectionRunnerFactory, IProjectionRunner, IEventDeserializer, IProjectionFactory} from "prettygoat";
 import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rxjs";
+import {ITestRunner} from "scripts/ITestRunner";
+import MockReadModel from "./fixtures/MockReadModel";
 
 describe("Given a test runner", () => {
 
     let subject: ITestRunner<number>;
-    let objectContainer: IMock<IObjectContainer>;
     let runnerFactory: IMock<IProjectionRunnerFactory>;
     let projectionRunner: IMock<IProjectionRunner<number>>;
     let deserializer: IMock<IEventDeserializer>;
+    let projectionFactory: IMock<IProjectionFactory>;
 
     beforeEach(() => {
+        projectionFactory = Mock.ofType<IProjectionFactory>();
         projectionRunner = Mock.ofType(MockProjectionRunner);
         runnerFactory = Mock.ofType<IProjectionRunnerFactory>();
-        objectContainer = Mock.ofType<IObjectContainer>();
         deserializer = Mock.ofType<IEventDeserializer>();
         deserializer.setup(d => d.toEvent(It.isAny())).returns(() => null);
-        subject = new TestRunner<number>(new TestStreamFactory(), objectContainer.object, () => null, {},
-            runnerFactory.object, deserializer.object);
+        subject = new TestRunner<number>(new TestStreamFactory(), runnerFactory.object, projectionFactory.object, deserializer.object);
         runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
     });
 
@@ -37,21 +37,33 @@ describe("Given a test runner", () => {
         }, null]);
     }
 
-    context("when a projection is already registered", () => {
+    context("when a readmodel is provided", () => {
         beforeEach(() => {
             runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
-            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockProjection());
-            objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
+            projectionFactory.setup(o => o.create(It.isAny())).returns(() => new MockProjection().define());
+            projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
+                publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
+                publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
+            }));
         });
-        it("should unbind it", () => {
-            subject.of(MockProjection);
-            objectContainer.verify(o => o.remove("prettygoat:definitions:test"), Times.once());
+        it("should be used the same as a projection", async () => {
+            subject
+                .of(new MockReadModel().define())
+                .startWith(50)
+                .fromEvents([{
+                    type: "test",
+                    payload: 50,
+                    timestamp: new Date(100)
+                }]);
+            let state = await subject.run();
+
+            expect(state).to.be(100);
         });
     });
 
     context("when a projection is supplied", () => {
         beforeEach(() => {
-            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockProjection());
+            projectionFactory.setup(o => o.create(It.isAny())).returns(() => new MockProjection().define());
             subject.of(MockProjection);
         });
 
@@ -199,7 +211,7 @@ describe("Given a test runner", () => {
         });
         it("should work the same as the other way", async () => {
             let state = await subject
-                .of(new MockProjection())
+                .of(new MockProjection().define())
                 .fromEvents([{
                     type: "test",
                     payload: 20,
