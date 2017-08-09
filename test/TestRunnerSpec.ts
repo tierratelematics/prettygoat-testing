@@ -8,7 +8,7 @@ import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rxjs";
 import {ITestRunner} from "scripts/ITestRunner";
-import MockReadModel from "../../prettygoat/test/fixtures/definitions/MockReadModel";
+import MockReadModel from "./fixtures/MockReadModel";
 
 describe("Given a test runner", () => {
 
