@@ -1,8 +1,8 @@
-import ITestRunner from "./ITestRunner";
 import {IModule, PrettyGoatModule} from "prettygoat";
 import {Container} from "inversify";
 import TestModule from "./TestModule";
 import {forEach} from "lodash";
+import {ITestRunner} from "./ITestRunner";
 
 class TestEnvironment {
 

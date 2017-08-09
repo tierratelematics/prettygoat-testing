@@ -1,4 +1,3 @@
-import ITestRunner from "./ITestRunner";
 import {
     IProjectionDefinition,
     Event,
@@ -12,6 +11,7 @@ import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./TestStreamFactory";
 import {ISubscription} from "rxjs/Subscription";
 import {map, last, cloneDeep, isFunction} from "lodash";
+import {ITestRunner, ReadModelOrProjection} from "./ITestRunner";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
@@ -31,7 +31,7 @@ class TestRunner<T> implements ITestRunner<T> {
 
     }
 
-    of(constructor: interfaces.Newable<IProjectionDefinition<T>> | IProjectionDefinition<T>): ITestRunner<T> {
+    of(constructor: ReadModelOrProjection<T> | interfaces.Newable<ReadModelOrProjection<T>>): ITestRunner<T> {
         let projectionDefinition: IProjectionDefinition<T>;
         if (!isFunction(constructor)) {
             projectionDefinition = <IProjectionDefinition<T>> constructor;

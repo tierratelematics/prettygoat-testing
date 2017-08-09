@@ -1,13 +1,14 @@
 import "reflect-metadata";
 import expect = require("expect.js");
 import {IMock, Mock, Times, It} from "typemoq";
-import ITestRunner from "../scripts/ITestRunner";
 import TestRunner from "../scripts/TestRunner";
 import MockProjection from "./fixtures/MockProjection";
 import {IObjectContainer, IProjectionRunnerFactory, IProjectionRunner, IEventDeserializer} from "prettygoat";
 import TestStreamFactory from "../scripts/TestStreamFactory";
 import MockProjectionRunner from "./fixtures/MockProjectionRunner";
 import {Observable} from "rxjs";
+import {ITestRunner} from "scripts/ITestRunner";
+import MockReadModel from "../../prettygoat/test/fixtures/definitions/MockReadModel";
 
 describe("Given a test runner", () => {
 
@@ -23,8 +24,7 @@ describe("Given a test runner", () => {
         objectContainer = Mock.ofType<IObjectContainer>();
         deserializer = Mock.ofType<IEventDeserializer>();
         deserializer.setup(d => d.toEvent(It.isAny())).returns(() => null);
-        subject = new TestRunner<number>(new TestStreamFactory(), objectContainer.object, () => null, {},
-            runnerFactory.object, deserializer.object);
+        subject = new TestRunner<number>(new TestStreamFactory(), objectContainer.object, runnerFactory.object, deserializer.object);
         runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
     });
 
@@ -46,6 +46,31 @@ describe("Given a test runner", () => {
         it("should unbind it", () => {
             subject.of(MockProjection);
             objectContainer.verify(o => o.remove("prettygoat:definitions:test"), Times.once());
+        });
+    });
+
+    context("when a readmodel is provided", () => {
+        beforeEach(() => {
+            runnerFactory.setup(r => r.create(It.isAny())).returns(() => projectionRunner.object);
+            objectContainer.setup(o => o.get(It.isAny())).returns(() => new MockReadModel());
+            objectContainer.setup(o => o.contains("prettygoat:definitions:test")).returns(() => true);
+            projectionRunner.setup(p => p.notifications()).returns(() => Observable.create(observer => {
+                publishReadModel(projectionRunner.object, observer, "Mock", 50, new Date(1));
+                publishReadModel(projectionRunner.object, observer, "Mock", 100, new Date(100));
+            }));
+        });
+        it("should be used the same as a projection", async () => {
+            subject
+                .of(new MockReadModel())
+                .startWith(50)
+                .fromEvents([{
+                    type: "test",
+                    payload: 50,
+                    timestamp: new Date(100)
+                }]);
+            let state = await subject.run();
+
+            expect(state).to.be(100);
         });
     });
 

@@ -3,7 +3,7 @@ import {interfaces} from "inversify";
 import TestDateRetriever from "./TestDateRetriever";
 import TestStreamFactory from "./TestStreamFactory";
 import TestRunner from "./TestRunner";
-import ITestRunner from "./ITestRunner";
+import {ITestRunner} from "./ITestRunner";
 
 class TestModule implements IModule {
 
