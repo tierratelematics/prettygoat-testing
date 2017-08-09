@@ -1,17 +1,17 @@
 import {
-    IProjectionDefinition,
     Event,
     IObjectContainer,
     IProjectionRunnerFactory,
     IProjection,
     Snapshot,
-    IEventDeserializer
+    IEventDeserializer,
+    IProjectionFactory
 } from "prettygoat";
 import {inject, interfaces, injectable, optional} from "inversify";
 import TestStreamFactory from "./TestStreamFactory";
 import {ISubscription} from "rxjs/Subscription";
 import {map, last, cloneDeep, isFunction} from "lodash";
-import {ITestRunner, ReadModelOrProjection} from "./ITestRunner";
+import {ITestRunner, ReadModelOrProjection, ReadModelOrProjectionDef} from "./ITestRunner";
 
 @injectable()
 class TestRunner<T> implements ITestRunner<T> {
@@ -25,24 +25,14 @@ class TestRunner<T> implements ITestRunner<T> {
     private subscription: ISubscription;
 
     constructor(@inject("IStreamFactory") private streamFactory: TestStreamFactory,
-                @inject("IObjectContainer") private container: IObjectContainer,
                 @inject("IProjectionRunnerFactory") private runnerFactory: IProjectionRunnerFactory,
+                @inject("IProjectionFactory") private projectionFactory: IProjectionFactory,
                 @inject("IEventDeserializer") @optional() private deserializer?: IEventDeserializer) {
 
     }
 
-    of(constructor: ReadModelOrProjection<T> | interfaces.Newable<ReadModelOrProjection<T>>): ITestRunner<T> {
-        let projectionDefinition: IProjectionDefinition<T>;
-        if (!isFunction(constructor)) {
-            projectionDefinition = <IProjectionDefinition<T>> constructor;
-        } else {
-            const key = `prettygoat:definitions:test`;
-            if (this.container.contains(key))
-                this.container.remove(key);
-            this.container.set(key, constructor);
-            projectionDefinition = this.container.get<IProjectionDefinition<T>>(key);
-        }
-        this.projection = projectionDefinition.define();
+    of(constructor: ReadModelOrProjection<T> | interfaces.Newable<ReadModelOrProjectionDef<T>>): ITestRunner<T> {
+        this.projection = !isFunction(constructor) ? <IProjection<T>> constructor : this.projectionFactory.create(constructor);
         return this;
     }
 
