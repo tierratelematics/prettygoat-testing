@@ -1,6 +1,6 @@
 {
   "name": "prettygoat-testing",
-  "version": "2.0.0-2",
+  "version": "2.0.0",
   "dependencies": {
     "inversify": "~4.1.1",
     "lodash": "~4.13.1",
@@ -17,7 +17,7 @@
     "typemoq": "~1.2.1"
   },
   "peerDependencies": {
-    "prettygoat": "^4.0.0-3"
+    "prettygoat": "^4.0.0"
   },
   "main": "dist/prettygoat-testing.js",
   "typings": "declarations/prettygoat-testing.d.ts"
