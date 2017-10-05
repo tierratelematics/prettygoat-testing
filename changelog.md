@@ -1,3 +1,7 @@
+# 3.0.0
+
+Support for prettygoat 5.0
+
 # 2.0.0
 
 Bump to prettygoat 4.0
