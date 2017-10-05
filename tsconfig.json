@@ -10,6 +10,7 @@
     "paths": {
       "prettygoat": ["../prettygoat", "./node_modules/prettygoat"],
       "rxjs": ["../prettygoat/node_modules/rxjs", "./node_modules/rxjs"]
-    }
+    },
+    "declaration": true
   }
 }

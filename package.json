@@ -19,6 +19,6 @@
   "peerDependencies": {
     "prettygoat": "^4.0.0"
   },
-  "main": "dist/prettygoat-testing.js",
-  "typings": "declarations/prettygoat-testing.d.ts"
+  "main": "dist",
+  "typings": "dist"
 }
