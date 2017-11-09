@@ -1,3 +1,7 @@
+# 3.1.0
+
+Bump inversify
+
 # 3.0.0
 
 Support for prettygoat 5.0
