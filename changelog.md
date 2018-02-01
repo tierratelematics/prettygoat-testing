@@ -1,3 +1,7 @@
+# 4.0.0
+
+Bump prettygoat
+
 # 3.1.0
 
 Bump inversify
